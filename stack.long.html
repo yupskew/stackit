@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cube Stack</title>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="game"></canvas>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    let width = 0;
+    let height = 0;
+
+    const blockHeight = 22;
+
+    let tower = [];
+    let movingBlock = null;
+
+    let score = 0;
+    let bestScore = 0;
+
+    let started = false;
+    let gameOverTimer = 0;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function startingWidth() {
+      return Math.min(width * 0.6, 320);
+    }
+
+    function resetGame() {
+      const blockWidth = startingWidth();
+
+      tower = [
+        {
+          x: (width - blockWidth) / 2,
+          width: blockWidth
+        }
+      ];
+
+      movingBlock = {
+        x: 0,
+        width: blockWidth,
+        speed: 4
+      };
+
+      score = 0;
+      gameOverTimer = 0;
+    }
+
+    function placeBlock() {
+      if (gameOverTimer) return;
+
+      if (!started) {
+        started = true;
+        return;
+      }
+
+      const previous = tower[tower.length - 1];
+
+      const leftEdge = Math.max(previous.x, movingBlock.x);
+      const rightEdge = Math.min(
+        previous.x + previous.width,
+        movingBlock.x + movingBlock.width
+      );
+
+      if (rightEdge <= leftEdge) {
+        bestScore = Math.max(bestScore, score);
+        gameOverTimer = 50;
+        return;
+      }
+
+      movingBlock.x = leftEdge;
+      movingBlock.width = rightEdge - leftEdge;
+
+      tower.push({
+        x: movingBlock.x,
+        width: movingBlock.width
+      });
+
+      score = tower.length - 1;
+      bestScore = Math.max(bestScore, score);
+
+      const fromRight = score % 2 === 1;
+      const speed = 4 + score * 0.25;
+
+      movingBlock = {
+        x: fromRight ? width - movingBlock.width : 0,
+        width: movingBlock.width,
+        speed: speed * (fromRight ? -1 : 1)
+      };
+    }
+
+    window.addEventListener("keydown", event => {
+      if (
+        event.key === " " ||
+        event.key === "ArrowUp" ||
+        event.key.toLowerCase() === "w"
+      ) {
+        placeBlock();
+      }
+    });
+
+    window.addEventListener("pointerdown", placeBlock);
+
+    function update() {
+      if (!started || gameOverTimer) {
+        if (gameOverTimer && --gameOverTimer === 1) {
+          resetGame();
+        }
+
+        return;
+      }
+
+      movingBlock.x += movingBlock.speed;
+
+      if (movingBlock.x < 0) {
+        movingBlock.x = 0;
+        movingBlock.speed *= -1;
+      }
+
+      if (movingBlock.x + movingBlock.width > width) {
+        movingBlock.x = width - movingBlock.width;
+        movingBlock.speed *= -1;
+      }
+    }
+
+    function drawBlock(index, block, color, scroll) {
+      const y = height - (index + 1) * blockHeight + scroll;
+
+      ctx.fillStyle = color;
+      ctx.fillRect(block.x, y, block.width, blockHeight - 2);
+    }
+
+    function draw() {
+      ctx.fillStyle = "#00aaff";
+      ctx.fillRect(0, 0, width, height);
+
+      const scroll = Math.max(
+        0,
+        tower.length * blockHeight - height * 0.72
+      );
+
+      tower.forEach((block, index) => {
+        const isFailedBlock =
+          index === tower.length - 1 && gameOverTimer;
+
+        drawBlock(
+          index,
+          block,
+          isFailedBlock ? "#ff5555" : "#ffffff",
+          scroll
+        );
+      });
+
+      if (started && !gameOverTimer) {
+        drawBlock(
+          tower.length,
+          movingBlock,
+          "#ffffff",
+          scroll
+        );
+      }
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "16px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(`${score}  BEST ${bestScore}`, 12, 24);
+
+      if (!started) {
+        ctx.font = "bold 24px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("TAP TO STACK", width / 2, height / 2);
+      }
+
+      if (gameOverTimer) {
+        ctx.font = "bold 24px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("MISS!", width / 2, height / 2);
+      }
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    resetGame();
+    gameLoop();
+  </script>
+</body>
+</html>
