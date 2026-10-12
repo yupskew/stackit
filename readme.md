@@ -1,6 +1,6 @@
 Shrink games
 
-1)Cube Stack
+# 1.Cube Stack
 A tiny stacking game made with HTML Canvas and JavaScript.
 Place each moving block on top of the last one. Miss the stack and the game resets.
 
@@ -17,7 +17,7 @@ Place each moving block on top of the last one. Miss the stack and the game rese
 - Web Audio API
 
 ___________________________
-2. Rat King
+$ 2. Rat King
 A tiny endless runner made with HTML Canvas and JavaScript.
 You owe rent. Run, hop the carts, dodge the bodega cat.
 Controls
