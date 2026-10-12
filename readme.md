@@ -4,17 +4,7 @@ Shrink games
 A tiny stacking game made with HTML Canvas and JavaScript.
 Place each moving block on top of the last one. Miss the stack and the game resets.
 
-## Controls
-- Click / Tap
-- Space
-- Arrow Up
-- W
 
-## Built With
-- HTML
-- JavaScript
-- Canvas API
-- Web Audio API
 
 ___________________________
 # 2. Rat King
@@ -28,3 +18,13 @@ Built With
 - JavaScript
 - Canvas API
 - Web Audio API
+
+
+
+## Controls (works for both)
+- Click / Tap
+- Space
+- Arrow Up
+- W
+
+
